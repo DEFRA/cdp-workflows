@@ -59,13 +59,17 @@ jobs:
         run: |
           bash versioning/create_nuget_config.sh ${{ secrets.nuget-config-including-pat }}
 
-      - id: buildImage
-        name: Build image
-        run: |
+      - name: Set up env values
+        env:
           ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
           REPO_URL=`git remote get-url origin`
           IMAGE_TAG=v${{ steps.increment-git-tag.outputs.GIT-TAG }}
           GIT_HASH=`git rev-parse --short "$GITHUB_SHA"`
+        run: echo "env vars set up ok"
+
+      - id: buildImage
+        name: Build image
+        run: |
           docker build . --no-cache \
           --tag $ECR_REGISTRY/${{ inputs.image-name }}:$IMAGE_TAG \
           --label defra.cdp.git.repo.url="$REPO_URL" \
@@ -74,12 +78,10 @@ jobs:
 
       - name: Tag image
         run: |
-          ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG=v${{ steps.increment-git-tag.outputs.GIT-TAG }}
-          GIT_HASH=`git rev-parse --short "$GITHUB_SHA"`
-          $TAG_LIST="$TAG_LIST $GIT_HASH"
+          # Add Git hash to tag list
+          EXTRA_TAG_LIST="$TAG_LIST $GIT_HASH"
           echo "Tags are $TAG_LIST"
-          for TAG in $TAG_LIST
+          for TAG in $EXTRA_TAG_LIST
           do
             echo "creating tag $TAG"
             docker image tag $ECR_REGISTRY/${{ inputs.image-name }}:$IMAGE_TAG $ECR_REGISTRY/${{ inputs.image-name }}:$TAG
