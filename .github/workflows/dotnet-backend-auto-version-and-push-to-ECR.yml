@@ -92,7 +92,7 @@ jobs:
           docker image push ${{ env.ECR_REGISTRY }}/${{ inputs.image-name }}:${{ env.IMAGE_TAG }}
           for TAG in ${{ env.TAG_LIST_INCL_HASH }}
           do
-            docker image push ${{ env.ECR_REGISTRY }}${{ inputs.image-name }}:$TAG
+            docker image push ${{ env.ECR_REGISTRY }}/${{ inputs.image-name }}:$TAG
           done
 
       - name: Cleanup - remove nuget.config as it contains sensitive info
