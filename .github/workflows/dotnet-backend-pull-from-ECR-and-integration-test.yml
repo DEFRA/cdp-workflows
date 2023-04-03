@@ -71,9 +71,7 @@ jobs:
 
       - name: Pull pre-built image and start container as backend API
         env:
-          IMAGE_TAG: v${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          FULL_IMAGE_NAME_AND_TAG: $ECR_REGISTRY/${{ inputs.image-name }}:$IMAGE_TAG
+          FULL_IMAGE_NAME_AND_TAG: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.image-name }}:v${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }}
         run: docker-compose -f docker-compose.yml -f docker-compose.integration.yml up -d
 
       - name: Wait for Docker container to finish starting up (timeout if not up in 15 secs)
