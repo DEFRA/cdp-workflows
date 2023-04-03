@@ -10,8 +10,6 @@ on:
         required: true
         type: string
     secrets:
-      nuget-config-including-pat:
-        required: true
       aws-account-id:
         required: true
 
@@ -55,10 +53,6 @@ jobs:
         run: |
           bash versioning/git_update.sh -v ${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }} -f ${{ steps.latest-git-tag.outputs.GIT-TAG-FOUND}}
 
-      - name: Create nuget.config contents from secret
-        run: |
-          bash versioning/create_nuget_config.sh ${{ secrets.nuget-config-including-pat }}
-
       - name: Set up env values
         run: |
           echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
@@ -94,8 +88,3 @@ jobs:
           do
             docker image push ${{ env.ECR_REGISTRY }}/${{ inputs.image-name }}:$TAG
           done
-
-      - name: Cleanup - remove nuget.config as it contains sensitive info
-        if: always()
-        run: |
-          bash versioning/remove_nuget_config.sh

@@ -55,7 +55,6 @@ jobs:
 
       - name: Run image and start container as backend API
         env:
-          # ${ECR_REGISTRY}/cdp-dotnet-backend-exemplar:${IMAGE_TAG}
           FULL_IMAGE_NAME_AND_TAG: ${{ inputs.image-name }}:pipeline
         run: docker-compose -f docker-compose.yml -f docker-compose.integration.yml up -d
 
