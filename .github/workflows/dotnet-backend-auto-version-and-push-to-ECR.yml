@@ -68,7 +68,6 @@ jobs:
           GIT_HASH=`git rev-parse --short "$GITHUB_SHA"`
           docker build . --no-cache \
           --tag $ECR_REGISTRY/${{ inputs.image-name }}:$IMAGE_TAG \
-          --tag $ECR_REGISTRY/${{ inputs.image-name }}:$GIT_HASH \
           --label defra.cdp.git.repo.url="$REPO_URL" \
           --label defra.cdp.service.name="${{ inputs.image-name }}" \
           --label git.hash="$GIT_HASH"
@@ -77,6 +76,8 @@ jobs:
         run: |
           ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG=v${{ steps.increment-git-tag.outputs.GIT-TAG }}
+          GIT_HASH=`git rev-parse --short "$GITHUB_SHA"`
+          $TAG_LIST="$TAG_LIST $GIT_HASH"
           echo "Tags are $TAG_LIST"
           for TAG in $TAG_LIST
           do
