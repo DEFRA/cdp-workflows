@@ -68,6 +68,7 @@ jobs:
           GIT_HASH=`git rev-parse --short "$GITHUB_SHA"`
           docker build . --no-cache \
           --tag $ECR_REGISTRY/${{ inputs.image-name }}:$IMAGE_TAG \
+          --tag $ECR_REGISTRY/${{ inputs.image-name }}:$GIT_HASH \
           --label defra.cdp.git.repo.url="$REPO_URL" \
           --label defra.cdp.service.name="${{ inputs.image-name }}" \
           --label git.hash="$GIT_HASH"
