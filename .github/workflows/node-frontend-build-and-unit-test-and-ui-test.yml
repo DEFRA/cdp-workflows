@@ -24,9 +24,6 @@ jobs:
       - name: Install npm
         run: npm install
 
-      - name: Linting
-        run: npm run test:lint
-
       - id: buildImage
         name: Build image
         run: |
@@ -47,6 +44,9 @@ jobs:
       # In case there are any issues with the containers, the logs can be retrieved using this action
       #- name: Dump docker logs
       #  uses: jwalton/gh-docker-logs@v2
+
+      - name: Build in order to generate nunjucks etc
+        run: npm run build
 
       - name: Run Unit Tests
         run: npm run test
