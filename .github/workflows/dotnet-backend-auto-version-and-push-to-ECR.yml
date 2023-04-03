@@ -65,10 +65,12 @@ jobs:
           ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
           REPO_URL=`git remote get-url origin`
           IMAGE_TAG=v${{ steps.increment-git-tag.outputs.GIT-TAG }}
+          GIT_HASH=`git rev-parse --short "$GITHUB_SHA"`
           docker build . --no-cache \
           --tag $ECR_REGISTRY/${{ inputs.image-name }}:$IMAGE_TAG \
           --label defra.cdp.git.repo.url="$REPO_URL" \
-          --label defra.cdp.service.name="${{ inputs.image-name }}"
+          --label defra.cdp.service.name="${{ inputs.image-name }}" \
+          --label git.hash="$GIT_HASH"
 
       - name: Tag image
         run: |

@@ -38,7 +38,8 @@ jobs:
           docker build . --no-cache \
           --tag ${{ inputs.image-name }}:${{ inputs.image-tag }} \
           --label defra.cdp.git.repo.url="$REPO_URL" \
-          --label defra.cdp.service.name="${{ inputs.image-name }}"
+          --label defra.cdp.service.name="${{ inputs.image-name }}" \
+          --label git.hash="$GIT_HASH"
 
       - name: Cleanup - remove nuget.config as it contains sensitive info
         if: always()
