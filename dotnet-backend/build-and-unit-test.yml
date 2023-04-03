@@ -1,0 +1,46 @@
+name: Build and push to ECR
+
+on:
+  workflow_call:
+    inputs:
+      image-name:
+        required: true
+        type: string
+      image-tag:
+        required: true
+        type: string
+    secrets:
+      nuget-config-including-pat:
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build Image and Unit Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Create nuget.config contents from secret
+        run: |
+          bash versioning/create_nuget_config.sh ${{ secrets.nuget-config-including-pat }}
+
+      - id: buildImage
+        name: Build image
+        run: |
+          REPO_URL=`git remote get-url origin`
+          docker build . --no-cache \
+          --tag ${{ inputs.image-name }}:${{ inputs.image-tag }} \
+          --label defra.cdp.git.repo.url="$REPO_URL" \
+          --label defra.cdp.service.name="${{ inputs.image-name }}"
+
+      - name: Cleanup - remove nuget.config as it contains sensitive info
+        if: always()
+        run: |
+          bash versioning/remove_nuget_config.sh

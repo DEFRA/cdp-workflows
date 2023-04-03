@@ -1,0 +1,78 @@
+name: Build and unit test and integration test
+
+on:
+  workflow_call:
+    inputs:
+      image-name:
+        required: true
+        type: string
+      integration-project-and-path:
+        required: true
+        type: string
+    secrets:
+      nuget-config-including-pat:
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build Image and Unit Test and Integration Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Create nuget.config contents from secret
+        run: |
+          bash versioning/create_nuget_config.sh ${{ secrets.nuget-config-including-pat }}
+
+      - id: buildImage
+        name: Build image
+        run: |
+          docker build . --no-cache \
+          --tag ${{ inputs.image-name }}:pipeline
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Install dependencies
+        run: dotnet restore ${{ inputs.integration-project-and-path }}
+
+      - name: Build Integration Tests
+        run: dotnet build ${{ inputs.integration-project-and-path }} --no-restore
+
+      - name: Create local certificates for https
+        run: |
+          dotnet dev-certs https -ep $HOME/.aspnet/https/aspnetapp.pfx -p password
+          dotnet dev-certs https --trust
+
+      - name: Run image and start container as backend API
+        env:
+          # ${ECR_REGISTRY}/cdp-dotnet-backend-exemplar:${IMAGE_TAG}
+          FULL_IMAGE_NAME_AND_TAG: ${{ inputs.image-name }}:pipeline
+        run: docker-compose -f docker-compose.yml -f docker-compose.integration.yml up -d
+
+      - name: Wait for Docker container to finish starting up (timeout if not up in 15 secs)
+        uses: iFaxity/wait-on-action@v1
+        with:
+          resource: https://localhost:5001
+          timeout: 15000
+
+      # In case there are any issues with the containers, the logs can be retrieved using this action
+      #- name: Dump docker logs
+      #  uses: jwalton/gh-docker-logs@v2
+
+      - name: Run Integration Tests
+        run: dotnet test ${{ inputs.integration-project-and-path }} --no-restore
+
+      - name: Cleanup - remove nuget.config as it contains sensitive info
+        if: always()
+        run: |
+          bash versioning/remove_nuget_config.sh

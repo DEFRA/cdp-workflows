@@ -1,0 +1,94 @@
+name: Pull from ECR and run UI tests
+
+on:
+  workflow_call:
+    inputs:
+      image-name:
+        required: true
+        type: string
+      aws-region:
+        required: true
+        type: string
+      integration-project-and-path:
+        required: true
+        type: string
+    secrets:
+      nuget-config-including-pat:
+        required: true
+      aws-account-id:
+        required: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write
+
+jobs:
+  build:
+    name: Pull and Integration Test Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '6.0.x'
+
+      - name: Create nuget.config contents from secret
+        run: |
+          bash versioning/create_nuget_config.sh ${{ secrets.nuget-config-including-pat }}
+
+      - name: Install dependencies
+        run: dotnet restore ${{ inputs.integration-project-and-path }}
+
+      - name: Build Integration Tests
+        run: dotnet build ${{ inputs.integration-project-and-path }} --no-restore
+
+      # Using IAM role based for OIDC identity provider
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ inputs.aws-region }}
+          role-to-assume: arn:aws:iam::${{ secrets.aws-account-id }}:role/github-actions-role
+      - run: aws sts get-caller-identity
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Find Most Recent Tag
+        id: latest-git-tag
+        run: |
+          bash versioning/git_latest.sh
+
+      - name: Create local certificates for https
+        run: |
+          dotnet dev-certs https -ep $HOME/.aspnet/https/aspnetapp.pfx -p password
+          dotnet dev-certs https --trust
+
+      - name: Pull pre-built image and start container as backend API
+        env:
+          IMAGE_TAG: v${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }}
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: docker-compose -f docker-compose.yml -f docker-compose.integration.yml up -d
+
+      - name: Wait for Docker container to finish starting up (timeout if not up in 15 secs)
+        uses: iFaxity/wait-on-action@v1
+        with:
+          resource: https://localhost:5001
+          timeout: 15000
+
+      # In case there are any issues with the containers, the logs can be retrieved using this action
+      #- name: Dump docker logs
+      #  uses: jwalton/gh-docker-logs@v2
+
+      - name: Run Integration Tests
+        run: dotnet test ${{ inputs.integration-project-and-path }} --no-restore
+
+      - name: Cleanup - remove nuget.config as it contains sensitive info
+        if: always()
+        run: |
+          bash versioning/remove_nuget_config.sh
