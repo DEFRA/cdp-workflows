@@ -60,41 +60,38 @@ jobs:
           bash versioning/create_nuget_config.sh ${{ secrets.nuget-config-including-pat }}
 
       - name: Set up env values
-        env:
-          ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
-          REPO_URL=`git remote get-url origin`
-          IMAGE_TAG=v${{ steps.increment-git-tag.outputs.GIT-TAG }}
-          GIT_HASH=`git rev-parse --short "$GITHUB_SHA"`
-        run: echo "env vars set up ok"
+        run: |
+          echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+          echo "REPO_URL=`git remote get-url origin`" >> $GITHUB_ENV
+          echo "IMAGE_TAG=v${{ steps.increment-git-tag.outputs.GIT-TAG }}" >> $GITHUB_ENV
+          echo "GIT_HASH=`git rev-parse --short "$GITHUB_SHA"`" >> $GITHUB_ENV
 
       - id: buildImage
         name: Build image
         run: |
           docker build . --no-cache \
-          --tag $ECR_REGISTRY/${{ inputs.image-name }}:$IMAGE_TAG \
-          --label defra.cdp.git.repo.url="$REPO_URL" \
+          --tag ${{ env.ECR_REGISTRY }}/${{ inputs.image-name }}:${{ env.IMAGE_TAG }} \
+          --label defra.cdp.git.repo.url="${{ env.REPO_URL }}" \
           --label defra.cdp.service.name="${{ inputs.image-name }}" \
-          --label git.hash="$GIT_HASH"
+          --label git.hash="${{ env.GIT_HASH }}"
 
       - name: Tag image
         run: |
           # Add Git hash to tag list
-          EXTRA_TAG_LIST="$TAG_LIST $GIT_HASH"
+          EXTRA_TAG_LIST="$TAG_LIST ${{ env.GIT_HASH }}"
           echo "Tags are $TAG_LIST"
           for TAG in $EXTRA_TAG_LIST
           do
             echo "creating tag $TAG"
-            docker image tag $ECR_REGISTRY/${{ inputs.image-name }}:$IMAGE_TAG $ECR_REGISTRY/${{ inputs.image-name }}:$TAG
+            docker image tag ${{ env.ECR_REGISTRY }}/${{ inputs.image-name }}:${{ env.IMAGE_TAG }} ${{ env.ECR_REGISTRY }}/${{ inputs.image-name }}:$TAG
           done
 
       - name: Push docker image
         run: |
-          ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG=v${{ steps.increment-git-tag.outputs.GIT-TAG }}
-          docker image push $ECR_REGISTRY/${{ inputs.image-name }}:$IMAGE_TAG
+          docker image push ${{ env.ECR_REGISTRY }}/${{ inputs.image-name }}:${{ env.IMAGE_TAG }}
           for TAG in $TAG_LIST
           do
-            docker image push $ECR_REGISTRY/${{ inputs.image-name }}:$TAG
+            docker image push ${{ env.ECR_REGISTRY }}${{ inputs.image-name }}:$TAG
           done
 
       - name: Cleanup - remove nuget.config as it contains sensitive info
