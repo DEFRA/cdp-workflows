@@ -55,7 +55,7 @@ jobs:
       - name: Wait for Docker container to finish starting up (timeout if not up in 15 secs)
         uses: iFaxity/wait-on-action@v1
         with:
-          resource: https://localhost:3000
+          resource: http://localhost:3000
           timeout: 15000
 
       # In case there are any issues with the containers, the logs can be retrieved using this action
