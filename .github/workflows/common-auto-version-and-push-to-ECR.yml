@@ -45,18 +45,20 @@ jobs:
 
       - name: Download required scripts
         run: |
-          curl -o versioning/git_latest.sh https://raw.githubusercontent.com/defra-cdp-sandpit/cdp-workflows/main/scripts/git_latest.sh
-          curl -o versioning/git_update.sh https://raw.githubusercontent.com/defra-cdp-sandpit/cdp-workflows/main/scripts/git_update.sh
+          pwd
+          curl -o git_latest.sh https://raw.githubusercontent.com/defra-cdp-sandpit/cdp-workflows/main/scripts/git_latest.sh
+          curl -o git_update.sh https://raw.githubusercontent.com/defra-cdp-sandpit/cdp-workflows/main/scripts/git_update.sh
+          ls -al
       
       - name: Automatic Tagging of Releases part 1
         id: latest-git-tag
         run: |
-          bash versioning/git_latest.sh
+          bash git_latest.sh
 
       - name: Automatic Tagging of Releases part 2
         id: increment-git-tag
         run: |
-          bash versioning/git_update.sh -v ${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }} -f ${{ steps.latest-git-tag.outputs.GIT-TAG-FOUND}}
+          bash git_update.sh -v ${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }} -f ${{ steps.latest-git-tag.outputs.GIT-TAG-FOUND}}
 
       - name: Set up env values
         run: |
