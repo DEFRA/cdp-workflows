@@ -46,12 +46,12 @@ jobs:
       - name: Automatic Tagging of Releases part 1
         id: latest-git-tag
         run: |
-          bash versioning/git_latest.sh
+          bash defra-cdp-sandpit/cdp-workflows/scripts/git_latest.sh
 
       - name: Automatic Tagging of Releases part 2
         id: increment-git-tag
         run: |
-          bash versioning/git_update.sh -v ${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }} -f ${{ steps.latest-git-tag.outputs.GIT-TAG-FOUND}}
+          bash defra-cdp-sandpit/cdp-workflows/scripts/git_update.sh -v ${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }} -f ${{ steps.latest-git-tag.outputs.GIT-TAG-FOUND}}
 
       - name: Set up env values
         run: |
