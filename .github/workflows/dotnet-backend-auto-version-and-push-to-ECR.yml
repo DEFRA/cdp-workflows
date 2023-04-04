@@ -1,0 +1,107 @@
+name: Build and push to ECR
+
+on:
+  workflow_call:
+    inputs:
+      image-name:
+        required: true
+        type: string
+      aws-region:
+        required: true
+        type: string
+    secrets:
+      aws-account-id:
+        required: true
+      nuget-config-including-pat:
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+env:
+  # Space-separated list of tags
+  TAG_LIST: "latest"
+
+jobs:
+  build:
+    name: Build Image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      # Using IAM role based for OIDC identity provider
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-region: ${{ inputs.aws-region }}
+          role-to-assume: arn:aws:iam::${{ secrets.aws-account-id }}:role/github-actions-role
+      - run: aws sts get-caller-identity
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Get common repo
+        uses: actions/checkout@v3
+        with:
+          repository: defra-cdp-sandpit/cdp-workflows
+          path: temp_scripts
+
+      - name: Automatic Tagging of Releases part 1
+        id: latest-git-tag
+        run: |
+          bash temp_scripts/scripts/git_latest.sh
+
+      - name: Automatic Tagging of Releases part 2
+        id: increment-git-tag
+        run: |
+          bash temp_scripts/scripts/git_update.sh -v ${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }} -f ${{ steps.latest-git-tag.outputs.GIT-TAG-FOUND}}
+
+      - name: Set up env values
+        run: |
+          echo "ECR_REGISTRY=${{ steps.login-ecr.outputs.registry }}" >> $GITHUB_ENV
+          echo "REPO_URL=`git remote get-url origin`" >> $GITHUB_ENV
+          echo "IMAGE_TAG=v${{ steps.increment-git-tag.outputs.GIT-TAG }}" >> $GITHUB_ENV
+          GIT_HASH=`git rev-parse --short "$GITHUB_SHA"`
+          echo "GIT_HASH=$GIT_HASH" >> $GITHUB_ENV
+          # Add Git hash to tag list
+          echo "TAG_LIST_INCL_HASH=$TAG_LIST $GIT_HASH" >> $GITHUB_ENV
+
+      - name: Create nuget.config contents from secret
+        run: |
+          bash temp_scripts/scripts/create_nuget_config.sh ${{ secrets.nuget-config-including-pat }}
+
+      - id: buildImage
+        name: Build image
+        run: |
+          docker build . --no-cache \
+          --tag ${{ env.ECR_REGISTRY }}/${{ inputs.image-name }}:${{ env.IMAGE_TAG }} \
+          --label defra.cdp.git.repo.url="${{ env.REPO_URL }}" \
+          --label defra.cdp.service.name="${{ inputs.image-name }}" \
+          --label git.hash="${{ env.GIT_HASH }}"
+
+      - name: Tag image
+        run: |
+          echo "Tags are ${{ env.TAG_LIST_INCL_HASH }}"
+          for TAG in ${{ env.TAG_LIST_INCL_HASH }}
+          do
+            echo "creating tag $TAG"
+            docker image tag ${{ env.ECR_REGISTRY }}/${{ inputs.image-name }}:${{ env.IMAGE_TAG }} ${{ env.ECR_REGISTRY }}/${{ inputs.image-name }}:$TAG
+          done
+
+      - name: Push docker image
+        run: |
+          docker image push ${{ env.ECR_REGISTRY }}/${{ inputs.image-name }}:${{ env.IMAGE_TAG }}
+          for TAG in ${{ env.TAG_LIST_INCL_HASH }}
+          do
+            docker image push ${{ env.ECR_REGISTRY }}/${{ inputs.image-name }}:$TAG
+          done
+
+      - name: Cleanup - remove nuget.config as it contains sensitive info
+        if: always()
+        run: |
+          bash temp_scripts/scripts/remove_nuget_config.sh
