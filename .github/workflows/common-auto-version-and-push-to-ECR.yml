@@ -50,6 +50,17 @@ jobs:
           ls -al
           cat git_latest.sh
       
+      - name: Check out my other private repo
+        uses: actions/checkout@v3
+        with:
+          repository: defra-cdp-sandpit/cdp-workflows
+          path: scripts
+          ref: feature/common-scripts
+
+      - name: File listing
+        run: |
+          ls -al
+
       - name: Automatic Tagging of Releases part 1
         id: latest-git-tag
         run: |
