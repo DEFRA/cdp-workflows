@@ -50,27 +50,26 @@ jobs:
 #          ls -al
 #          cat git_latest.sh
       
-      - name: Get common scripts
+      - name: Get common repo
         uses: actions/checkout@v3
         with:
           repository: defra-cdp-sandpit/cdp-workflows
-          path: scripts
+          path: temp_scripts
           ref: feature/common-scripts
 
       - name: File listing
         run: |
-          ls -al
-          ls -al scripts
+          ls -al temp_scripts/scripts
 
       - name: Automatic Tagging of Releases part 1
         id: latest-git-tag
         run: |
-          bash scripts/git_latest.sh
+          bash temp_scripts/scripts/git_latest.sh
 
       - name: Automatic Tagging of Releases part 2
         id: increment-git-tag
         run: |
-          bash scripts/git_update.sh -v ${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }} -f ${{ steps.latest-git-tag.outputs.GIT-TAG-FOUND}}
+          bash temp_scripts/scripts/git_update.sh -v ${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }} -f ${{ steps.latest-git-tag.outputs.GIT-TAG-FOUND}}
 
       - name: Set up env values
         run: |
