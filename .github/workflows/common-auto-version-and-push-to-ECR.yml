@@ -45,8 +45,8 @@ jobs:
 
       - name: Download required scripts
         run: |
-          curl -o git_latest.sh https://raw.githubusercontent.com/defra-cdp-sandpit/cdp-workflows/feature/common-scripts/scripts/git_latest.sh
-          curl -o git_update.sh https://raw.githubusercontent.com/defra-cdp-sandpit/cdp-workflows/feature/common-scripts/scripts/git_update.sh
+          curl -o git_latest.sh https://raw.githubusercontent.com/defra-cdp-sandpit/cdp-workflows/feature/common-scripts/scripts/git_latest.sh?token=${{ secrets.GITHUB_TOKEN }}
+          curl -o git_update.sh https://raw.githubusercontent.com/defra-cdp-sandpit/cdp-workflows/feature/common-scripts/scripts/git_update.sh?token=${{ secrets.GITHUB_TOKEN }}
           ls -al
           cat git_latest.sh
       
