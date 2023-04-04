@@ -43,23 +43,11 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
-#      - name: Download required scripts
-#        run: |
-#          curl -o git_latest.sh https://raw.githubusercontent.com/defra-cdp-sandpit/cdp-workflows/feature/common-scripts/scripts/git_latest.sh?token=${{ secrets.GITHUB_TOKEN }}
-#          curl -o git_update.sh https://raw.githubusercontent.com/defra-cdp-sandpit/cdp-workflows/feature/common-scripts/scripts/git_update.sh?token=${{ secrets.GITHUB_TOKEN }}
-#          ls -al
-#          cat git_latest.sh
-      
       - name: Get common repo
         uses: actions/checkout@v3
         with:
           repository: defra-cdp-sandpit/cdp-workflows
           path: temp_scripts
-          ref: feature/common-scripts
-
-      - name: File listing
-        run: |
-          ls -al temp_scripts/scripts
 
       - name: Automatic Tagging of Releases part 1
         id: latest-git-tag

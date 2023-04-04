@@ -27,9 +27,15 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
+      - name: Get common repo
+        uses: actions/checkout@v3
+        with:
+          repository: defra-cdp-sandpit/cdp-workflows
+          path: temp_scripts
+
       - name: Create nuget.config contents from secret
         run: |
-          bash versioning/create_nuget_config.sh ${{ secrets.nuget-config-including-pat }}
+          bash temp_scripts/scripts/create_nuget_config.sh ${{ secrets.nuget-config-including-pat }}
 
       - id: buildImage
         name: Build image
@@ -74,4 +80,4 @@ jobs:
       - name: Cleanup - remove nuget.config as it contains sensitive info
         if: always()
         run: |
-          bash versioning/remove_nuget_config.sh
+          bash temp_scripts/scripts/remove_nuget_config.sh
