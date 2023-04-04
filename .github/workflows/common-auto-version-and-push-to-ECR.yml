@@ -48,6 +48,7 @@ jobs:
           curl -o git_latest.sh https://raw.githubusercontent.com/defra-cdp-sandpit/cdp-workflows/feature/common-scripts/scripts/git_latest.sh
           curl -o git_update.sh https://raw.githubusercontent.com/defra-cdp-sandpit/cdp-workflows/feature/common-scripts/scripts/git_update.sh
           ls -al
+          cat git_latest.sh
       
       - name: Automatic Tagging of Releases part 1
         id: latest-git-tag
