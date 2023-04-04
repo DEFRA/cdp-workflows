@@ -43,15 +43,21 @@ jobs:
         id: login-ecr
         uses: aws-actions/amazon-ecr-login@v1
 
+      - name: Get common repo
+        uses: actions/checkout@v3
+        with:
+          repository: defra-cdp-sandpit/cdp-workflows
+          path: temp_scripts
+
       - name: Automatic Tagging of Releases part 1
         id: latest-git-tag
         run: |
-          bash versioning/git_latest.sh
+          bash temp_scripts/scripts/git_latest.sh
 
       - name: Automatic Tagging of Releases part 2
         id: increment-git-tag
         run: |
-          bash versioning/git_update.sh -v ${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }} -f ${{ steps.latest-git-tag.outputs.GIT-TAG-FOUND}}
+          bash temp_scripts/scripts/git_update.sh -v ${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }} -f ${{ steps.latest-git-tag.outputs.GIT-TAG-FOUND}}
 
       - name: Set up env values
         run: |
