@@ -36,10 +36,12 @@ jobs:
         run: docker-compose -f docker-compose.yml -f docker-compose.run.yml up -d
 
       - name: Wait for Docker container to finish starting up (timeout if not up in 15 secs)
-        uses: iFaxity/wait-on-action@v1
+        uses: nev7n/wait_for_response@v1
         with:
-          resource: http://localhost:3000
+          url: 'http://localhost:3000/'
+          responseCode: 200
           timeout: 15000
+          interval: 200
 
       # In case there are any issues with the containers, the logs can be retrieved using this action
       #- name: Dump docker logs
