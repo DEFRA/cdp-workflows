@@ -80,12 +80,6 @@ jobs:
           FULL_IMAGE_NAME_AND_TAG: ${{ steps.login-ecr.outputs.registry }}/${{ inputs.image-name }}:v${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }}
         run: docker-compose -f docker-compose.yml -f docker-compose.integration.yml up -d
 
-      - name: Wait for Docker container to finish starting up (timeout if not up in 15 secs)
-        uses: iFaxity/wait-on-action@v1
-        with:
-          resource: https://localhost:5001
-          timeout: 15000
-
       # In case there are any issues with the containers, the logs can be retrieved using this action
       #- name: Dump docker logs
       #  uses: jwalton/gh-docker-logs@v2

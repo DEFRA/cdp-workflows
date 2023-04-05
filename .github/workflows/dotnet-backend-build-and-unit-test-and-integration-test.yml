@@ -15,6 +15,8 @@ on:
 
 permissions:
   contents: write
+  issues: read
+  checks: write
   pull-requests: write
   id-token: write
 
@@ -43,6 +45,31 @@ jobs:
           docker build . --no-cache \
           --tag ${{ inputs.image-name }}:pipeline
 
+      - name: Extract unit test results and code coverage results
+        run: |
+          export id=$(docker images --filter "label=test=true" -q | head -1)
+          docker create --name testcontainer $id
+          docker cp testcontainer:/app/testresults ./testresults
+          docker rm testcontainer
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            testresults/**/*.trx
+
+      - name: Code Coverage Summary Report
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: testresults/*/coverage.cobertura.xml
+          badge: true
+          format: 'markdown'
+          output: 'both'
+
+      - name: Write to Job Summary
+        run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
+
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v3
         with:
@@ -63,12 +90,6 @@ jobs:
         env:
           FULL_IMAGE_NAME_AND_TAG: ${{ inputs.image-name }}:pipeline
         run: docker-compose -f docker-compose.yml -f docker-compose.integration.yml up -d
-
-      - name: Wait for Docker container to finish starting up (timeout if not up in 15 secs)
-        uses: iFaxity/wait-on-action@v1
-        with:
-          resource: https://localhost:5001
-          timeout: 15000
 
       # In case there are any issues with the containers, the logs can be retrieved using this action
       #- name: Dump docker logs
