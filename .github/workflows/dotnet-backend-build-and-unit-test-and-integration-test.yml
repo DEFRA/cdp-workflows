@@ -43,6 +43,21 @@ jobs:
           docker build . --no-cache \
           --tag ${{ inputs.image-name }}:pipeline
 
+      - name: Extract unit test results
+        run: |
+          export id=$(docker images --filter "label=test=true" -q | head -1)
+          docker create --name testcontainer $id
+          docker cp testcontainer:/testresults ./testresults
+          docker rm testcontainer
+          ls -al testresults
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@v2
+        if: always()
+        with:
+          files: |
+            testresults/**/*.trx
+
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v3
         with:
