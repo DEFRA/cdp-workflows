@@ -51,6 +51,8 @@ jobs:
           docker cp testcontainer:/ ./testresults
           docker rm testcontainer
           ls -al testresults
+          ls -al testresults/app
+          ls -al testresults/src
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
