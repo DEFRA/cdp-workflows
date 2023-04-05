@@ -45,13 +45,12 @@ jobs:
           docker build . --no-cache \
           --tag ${{ inputs.image-name }}:pipeline
 
-      - name: Extract unit test results
+      - name: Extract unit test results and code coverage results
         run: |
           export id=$(docker images --filter "label=test=true" -q | head -1)
           docker create --name testcontainer $id
           docker cp testcontainer:/app/testresults ./testresults
           docker rm testcontainer
-          ls -al testresults/*
 
       - name: Publish Test Results
         uses: EnricoMi/publish-unit-test-result-action@v2
@@ -93,10 +92,12 @@ jobs:
         run: docker-compose -f docker-compose.yml -f docker-compose.integration.yml up -d
 
       - name: Wait for Docker container to finish starting up (timeout if not up in 15 secs)
-        uses: iFaxity/wait-on-action@v1
+        uses: nev7n/wait_for_response@v1
         with:
-          resource: https://localhost:5001
+          url: 'http://localhost:5001/'
+          responseCode: 200
           timeout: 15000
+          interval: 200
 
       # In case there are any issues with the containers, the logs can be retrieved using this action
       #- name: Dump docker logs
