@@ -91,10 +91,6 @@ jobs:
           FULL_IMAGE_NAME_AND_TAG: ${{ inputs.image-name }}:pipeline
         run: docker-compose -f docker-compose.yml -f docker-compose.integration.yml up -d
 
-      - name: Wait a few seconds for Docker container to finish starting up
-        run:
-          sleep 10
-
       # In case there are any issues with the containers, the logs can be retrieved using this action
       #- name: Dump docker logs
       #  uses: jwalton/gh-docker-logs@v2
