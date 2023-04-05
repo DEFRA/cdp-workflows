@@ -92,12 +92,12 @@ jobs:
         run: docker-compose -f docker-compose.yml -f docker-compose.integration.yml up -d
 
       - name: Wait for Docker container to finish starting up (timeout if not up in 15 secs)
-        uses: nev7n/wait_for_response@v1
+        uses: cygnetdigital/wait_for_response@v2.0.0
         with:
-          url: 'https://127.0.0.1:5001/'
-          responseCode: 200
+          url: https://localhost:5001
+          responseCode: '200,201,206'
           timeout: 15000
-          interval: 200
+          interval: 500
 
       # In case there are any issues with the containers, the logs can be retrieved using this action
       #- name: Dump docker logs
