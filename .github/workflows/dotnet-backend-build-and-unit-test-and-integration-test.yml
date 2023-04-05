@@ -47,7 +47,7 @@ jobs:
         run: |
           export id=$(docker images --filter "label=test=true" -q | head -1)
           docker create --name testcontainer $id
-          docker cp testcontainer:/src/*/testresults ./testresults
+          docker cp testcontainer:/app/testresults ./testresults
           docker rm testcontainer
           ls -al testresults/*
 
@@ -57,6 +57,17 @@ jobs:
         with:
           files: |
             testresults/**/*.trx
+
+      - name: Code Coverage Summary Report
+        uses: irongut/CodeCoverageSummary@v1.3.0
+        with:
+          filename: testresults/coverage/coverage.cobertura.xml
+          badge: true
+          format: 'markdown'
+          output: 'both'
+
+      - name: Write to Job Summary
+        run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
 
       - name: Setup .NET Core SDK
         uses: actions/setup-dotnet@v3
