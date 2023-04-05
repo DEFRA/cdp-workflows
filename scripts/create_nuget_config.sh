@@ -3,6 +3,4 @@
 
 echo "$1" | base64 -d > nuget.config
 
-cat nuget.config | grep -v ClearTextPassword
-
 exit 0
