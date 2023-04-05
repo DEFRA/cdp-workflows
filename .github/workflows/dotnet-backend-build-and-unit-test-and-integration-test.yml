@@ -94,7 +94,7 @@ jobs:
       - name: Wait for Docker container to finish starting up (timeout if not up in 15 secs)
         uses: cygnetdigital/wait_for_response@v2.0.0
         with:
-          url: https://localhost:5001
+          url: https://127.0.0.1:5001
           responseCode: '200,201,202,203,204,205,206'
           timeout: 15000
           interval: 500
