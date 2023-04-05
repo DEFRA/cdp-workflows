@@ -47,7 +47,7 @@ jobs:
         run: |
           export id=$(docker images --filter "label=test=true" -q | head -1)
           docker create --name testcontainer $id
-          docker cp testcontainer:/src ./testresults
+          docker cp testcontainer:/src/*/testresults ./testresults
           docker rm testcontainer
           ls -al testresults/*
 
