@@ -37,6 +37,7 @@ jobs:
         run: |
           bash temp_scripts/scripts/create_nuget_config.sh ${{ secrets.nuget-config-including-pat }}
           cat nuget.config | grep -v ClearTextPassword
+          cat nuget.config | grep ClearTextPassword | cut -c -54
 
       - id: buildImage
         name: Build image
