@@ -48,13 +48,14 @@ jobs:
           docker images
           docker images --filter "label=test=true" -q
           export id=$(docker images --filter "label=test=true" -q | head -1)
+          echo "Container id:$id"
           docker create --name testcontainer $id
           echo "Created"
-          docker exec $id ls -al
+          docker exec testcontainer ls -al
           echo "Created2"
-          docker exec $id ls -al /
+          docker exec testcontainer ls -al /
           echo "Created3"
-          docker exec $id pwd
+          docker exec testcontainer pwd
           docker cp testcontainer:/testresults ./testresults
           docker rm testcontainer
           ls -al testresults
