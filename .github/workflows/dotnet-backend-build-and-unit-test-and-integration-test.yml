@@ -48,18 +48,7 @@ jobs:
           export id=$(docker images --filter "label=test=true" -q | head -1)
           echo "Container id:$id"
           docker create --name testcontainer $id
-          echo "Created"
-          docker run $id
-          sleep 10
-          docker images
-          docker ps
-          echo "Running"
-          docker exec testcontainer ls -al
-          echo "Created2"
-          docker exec testcontainer ls -al /
-          echo "Created3"
-          docker exec testcontainer pwd
-          docker cp testcontainer:/testresults ./testresults
+          docker cp testcontainer:/ ./testresults
           docker rm testcontainer
           ls -al testresults
 
