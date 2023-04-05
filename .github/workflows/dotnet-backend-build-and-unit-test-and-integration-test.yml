@@ -50,6 +50,8 @@ jobs:
           # docker create --name testcontainer $id
           echo "Created"
           docker run --name testcontainer $id
+          sleep 10
+          docker images
           echo "Running"
           docker exec testcontainer ls -al
           echo "Created2"
