@@ -54,6 +54,9 @@ jobs:
         run: |
           bash temp_scripts/scripts/git_update.sh -v ${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }} -f ${{ steps.latest-git-tag.outputs.GIT-TAG-FOUND}}
 
+      - name: Add Nuget Source
+        run: dotnet nuget add source --username USERNAME --password ${{ secrets.packages-access-token }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/defra-cdp-sandpit/cdp-nugets/index.json"
+
       - name: Pack Nuget
         run: dotnet pack -p:Version=${{ steps.increment-git-tag.outputs.GIT-TAG }} -c Release
 
@@ -61,7 +64,7 @@ jobs:
         run: |
           dotnet nuget push \
           ./${{ inputs.project-name }}/bin/Release/${{ inputs.project-name }}.${{ steps.increment-git-tag.outputs.GIT-TAG }}.nupkg \
-          -k ${{ secrets.packages-access-token }} \
-          -s https://nuget.pkg.github.com/defra-cdp-sandpit/cdp-nugets/index.json \
+          --api-key ${{ secrets.packages-access-token }} \
+          --source "github" \
           --skip-duplicate \
           --no-symbols 
