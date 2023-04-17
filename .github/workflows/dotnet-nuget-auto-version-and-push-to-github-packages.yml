@@ -1,0 +1,63 @@
+name: Build NuGet and push to GitHub Packages
+
+on:
+  workflow_call:
+    inputs:
+      solution-filename:
+        required: true
+        type: string
+      nuget-generated-filename:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build NuGet and push to GitHub Packages
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ inputs.solution-filename }}
+
+      - name: Build
+        run: dotnet build ${{ inputs.solution-filename }} --no-restore
+
+      - name: Test
+        run: dotnet test ${{ inputs.solution-filename }} --no-build --verbosity normal
+
+      - name: Get common repo
+        uses: actions/checkout@v3
+        with:
+          repository: defra-cdp-sandpit/cdp-workflows
+          path: temp_scripts
+
+      - name: Automatic Tagging of Releases part 1
+        id: latest-git-tag
+        run: |
+          bash temp_scripts/scripts/git_latest.sh
+
+      - name: Automatic Tagging of Releases part 2
+        id: increment-git-tag
+        run: |
+          bash temp_scripts/scripts/git_update.sh -v ${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }} -f ${{ steps.latest-git-tag.outputs.GIT-TAG-FOUND}}
+
+      - name: Pack Nuget
+        run: dotnet pack -p:Version=${{ steps.increment-git-tag.outputs.GIT-TAG }} -c Release
+
+      - name: Publish Nuget to GitHub registry
+        run: dotnet nuget push ${{ inputs.nuget-generated-filename }} -k ${GITHUB_TOKEN} -s https://nuget.pkg.github.com/defra-cdp-sandpit/cdp-nugets/index.json --skip-duplicate --no-symbols 
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
