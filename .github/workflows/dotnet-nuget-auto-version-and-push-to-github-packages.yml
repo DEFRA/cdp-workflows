@@ -11,7 +11,6 @@ permissions:
   contents: write
   pull-requests: write
   id-token: write
-  packages: write
 
 jobs:
   build:
@@ -56,6 +55,9 @@ jobs:
         run: dotnet pack -p:Version=${{ steps.increment-git-tag.outputs.GIT-TAG }} -c Release
 
       - name: Publish Nuget to GitHub registry
-        run: dotnet nuget push ./${{ inputs.project-name }}/bin/Release/${{ inputs.project-name }}.${{ steps.increment-git-tag.outputs.GIT-TAG }}.nupkg -k ${GITHUB_TOKEN} -s https://nuget.pkg.github.com/defra-cdp-sandpit/cdp-nugets/index.json --skip-duplicate --no-symbols 
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: dotnet nuget push \
+          ./${{ inputs.project-name }}/bin/Release/${{ inputs.project-name }}.${{ steps.increment-git-tag.outputs.GIT-TAG }}.nupkg \
+          -k ${{ secrets.PACKAGES_ACCESS_TOKEN }} \
+          -s https://nuget.pkg.github.com/defra-cdp-sandpit/cdp-nugets/index.json \
+          --skip-duplicate \
+          --no-symbols 
