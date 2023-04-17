@@ -3,7 +3,7 @@ name: Build NuGet and unit test
 on:
   workflow_call:
     inputs:
-      solution-filename:
+      project-name:
         required: true
         type: string
 
@@ -27,10 +27,10 @@ jobs:
           dotnet-version: 6.0.x
 
       - name: Restore dependencies
-        run: dotnet restore ${{ inputs.solution-filename }}
+        run: dotnet restore ./${{ inputs.project-name }}.sln
 
       - name: Build
-        run: dotnet build ${{ inputs.solution-filename }} --no-restore
+        run: dotnet build ./${{ inputs.project-name }}.sln --no-restore
 
       - name: Test
-        run: dotnet test ${{ inputs.solution-filename }} --no-build --verbosity normal
+        run: dotnet test ./${{ inputs.project-name }}.sln --no-build --verbosity normal
