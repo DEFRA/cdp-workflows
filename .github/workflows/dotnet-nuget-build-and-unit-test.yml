@@ -1,0 +1,36 @@
+name: Build NuGet and unit test
+
+on:
+  workflow_call:
+    inputs:
+      project-name:
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  id-token: write
+
+jobs:
+  build:
+    name: Build NuGet and Unit Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: 6.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore ./${{ inputs.project-name }}.sln
+
+      - name: Build
+        run: dotnet build ./${{ inputs.project-name }}.sln --no-restore
+
+      - name: Test
+        run: dotnet test ./${{ inputs.project-name }}.sln --no-build --verbosity normal
