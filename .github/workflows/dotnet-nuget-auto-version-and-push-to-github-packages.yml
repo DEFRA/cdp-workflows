@@ -6,6 +6,9 @@ on:
       project-name:
         required: true
         type: string
+    secrets:
+      packages-access-token:
+        required: true
 
 permissions:
   contents: write
@@ -57,7 +60,7 @@ jobs:
       - name: Publish Nuget to GitHub registry
         run: dotnet nuget push \
           ./${{ inputs.project-name }}/bin/Release/${{ inputs.project-name }}.${{ steps.increment-git-tag.outputs.GIT-TAG }}.nupkg \
-          -k ${{ secrets.PACKAGES_ACCESS_TOKEN }} \
+          -k ${{ secrets.packages-access-token }} \
           -s https://nuget.pkg.github.com/defra-cdp-sandpit/cdp-nugets/index.json \
           --skip-duplicate \
           --no-symbols 
