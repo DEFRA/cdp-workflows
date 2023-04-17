@@ -58,7 +58,8 @@ jobs:
         run: dotnet pack -p:Version=${{ steps.increment-git-tag.outputs.GIT-TAG }} -c Release
 
       - name: Publish Nuget to GitHub registry
-        run: dotnet nuget push \
+        run: |
+          dotnet nuget push \
           ./${{ inputs.project-name }}/bin/Release/${{ inputs.project-name }}.${{ steps.increment-git-tag.outputs.GIT-TAG }}.nupkg \
           -k ${{ secrets.packages-access-token }} \
           -s https://nuget.pkg.github.com/defra-cdp-sandpit/cdp-nugets/index.json \
