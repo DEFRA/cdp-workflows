@@ -60,6 +60,10 @@ jobs:
         run: |
           bash temp_scripts/scripts/git_update.sh -v ${{ steps.latest-git-tag.outputs.CURRENT-GIT-TAG }} -f ${{ steps.latest-git-tag.outputs.GIT-TAG-FOUND}}
 
+      - name: Remove nuget.config so that writable source can be added afresh
+        run: |
+          rm -rf nuget.config
+
       - name: Add Nuget Source
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.packages-access-token }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/defra-cdp-sandpit/index.json"
 
