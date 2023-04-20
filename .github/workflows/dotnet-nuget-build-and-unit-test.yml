@@ -29,6 +29,9 @@ jobs:
         with:
           dotnet-version: 6.0.x
 
+      - name: Add Nuget Source
+        run: dotnet nuget add source --name github "https://nuget.pkg.github.com/defra-cdp-sandpit/index.json"
+
       - name: Restore dependencies
         run: dotnet restore ./${{ inputs.project-name }}.sln
 
@@ -37,8 +40,3 @@ jobs:
 
       - name: Test
         run: dotnet test ./${{ inputs.project-name }}.sln --no-build --verbosity normal
-
-      - name: Cleanup - remove nuget.config as it contains sensitive info
-        if: always()
-        run: |
-          bash temp_scripts/scripts/remove_nuget_config.sh
