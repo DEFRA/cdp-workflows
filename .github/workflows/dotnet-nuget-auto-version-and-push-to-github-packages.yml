@@ -9,6 +9,8 @@ on:
     secrets:
       packages-access-token:
         required: true
+      nuget-config-including-pat:
+        required: true
 
 permissions:
   contents: write
@@ -29,6 +31,16 @@ jobs:
         with:
           dotnet-version: 6.0.x
 
+      - name: Get common repo
+        uses: actions/checkout@v3
+        with:
+          repository: defra-cdp-sandpit/cdp-workflows
+          path: temp_scripts
+
+      - name: Create nuget.config contents from secret
+        run: |
+          bash temp_scripts/scripts/create_nuget_config.sh ${{ secrets.nuget-config-including-pat }}
+
       - name: Restore dependencies
         run: dotnet restore ./${{ inputs.project-name }}.sln
 
@@ -37,12 +49,6 @@ jobs:
 
       - name: Test
         run: dotnet test ./${{ inputs.project-name }}.sln --no-build --verbosity normal
-
-      - name: Get common repo
-        uses: actions/checkout@v3
-        with:
-          repository: defra-cdp-sandpit/cdp-workflows
-          path: temp_scripts
 
       - name: Automatic Tagging of Releases part 1
         id: latest-git-tag
@@ -68,3 +74,8 @@ jobs:
           --source "github" \
           --skip-duplicate \
           --no-symbols 
+
+      - name: Cleanup - remove nuget.config as it contains sensitive info
+        if: always()
+        run: |
+          bash temp_scripts/scripts/remove_nuget_config.sh
