@@ -41,7 +41,8 @@ jobs:
 
       - name: Temp output of nuget.config
         run: |
-          bash cat nuget.config
+          ls -al *
+          cat nuget.config
 
       - name: Restore dependencies
         run: dotnet restore ./${{ inputs.project-name }}.sln
