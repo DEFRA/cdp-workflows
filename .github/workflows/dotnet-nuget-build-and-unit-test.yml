@@ -39,11 +39,6 @@ jobs:
         run: |
           bash temp_scripts/scripts/create_nuget_config.sh ${{ secrets.nuget-config-including-pat }}
 
-      - name: Temp output of nuget.config
-        run: |
-          ls -al *
-          cat nuget.config
-
       - name: Restore dependencies
         run: dotnet restore ./${{ inputs.project-name }}.sln
 
