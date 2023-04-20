@@ -62,7 +62,7 @@ jobs:
 
       - name: Remove nuget.config so that writable source can be added afresh
         run: |
-          bash rm -rf nuget.config
+          rm -rf nuget.config
 
       - name: Add Nuget Source
         run: dotnet nuget add source --username USERNAME --password ${{ secrets.packages-access-token }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/defra-cdp-sandpit/index.json"
