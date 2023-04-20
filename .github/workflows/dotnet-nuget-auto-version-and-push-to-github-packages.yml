@@ -9,6 +9,8 @@ on:
     secrets:
       packages-access-token:
         required: true
+      nuget-config-including-pat:
+        required: true
 
 permissions:
   contents: write
