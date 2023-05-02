@@ -92,8 +92,8 @@ jobs:
         run: docker-compose -f docker-compose.yml -f docker-compose.integration.yml up -d
 
       # In case there are any issues with the containers, the logs can be retrieved using this action
-      #- name: Dump docker logs
-      #  uses: jwalton/gh-docker-logs@v2
+      - name: Dump docker logs
+        uses: jwalton/gh-docker-logs@v2
 
       - name: Run Integration Tests
         run: dotnet test ${{ inputs.integration-project-and-path }} --no-restore
