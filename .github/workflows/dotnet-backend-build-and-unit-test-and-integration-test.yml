@@ -49,7 +49,7 @@ jobs:
         run: |
           export id=$(docker images --filter "label=test=true" -q | head -1)
           docker create --name testcontainer $id
-          docker cp testcontainer:/app/testresults ./testresults
+          docker cp testcontainer:/home/dotnet/testresults ./testresults
           docker rm testcontainer
 
       - name: Publish Test Results
