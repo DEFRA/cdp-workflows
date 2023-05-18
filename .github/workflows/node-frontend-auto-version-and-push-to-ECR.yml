@@ -36,7 +36,7 @@ jobs:
         uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-region: ${{ inputs.aws-region }}
-          role-to-assume: arn:aws:iam::${{ secrets.aws-account-id }}:role/github-actions-role
+          role-to-assume: arn:aws:iam::${{ secrets.aws-account-id }}:role/github-svc-infra-actions-role
       - run: aws sts get-caller-identity
 
       - name: Login to Amazon ECR
