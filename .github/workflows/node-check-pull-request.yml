@@ -1,0 +1,19 @@
+name: Check Pull Request
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    name: Run Pull Request Checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          cache: npm
+      - run: npm install
+      - run: npm run format:check
+      - run: npm run lint
+      - run: npm test
