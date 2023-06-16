@@ -2,8 +2,8 @@
 set -eu
 IFS=$'\n\t'
 
-if test -f scripts/build.manifest; then
-    . scripts/build.manifest
+if test -f cdp-workflows/scripts/build.manifest; then
+    . cdp-workflows/scripts/build.manifest
 fi
 
 echo "Building docker image and tagging as $IMAGE_NAME:latest and $IMAGE_NAME:$BUILD_VERSION"
