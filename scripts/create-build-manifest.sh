@@ -14,7 +14,7 @@ VERSION=$(npm pkg get version)
 
 echo "Building build.manifest"
 
-cat <<EOF > ci/build.manifest
+cat <<EOF > scripts/build.manifest
 #!/bin/sh
 # Generated build manifest for $IMAGE_NAME
 IMAGE_NAME="$IMAGE_NAME"
