@@ -76,7 +76,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: build.manifest
-          path: ci/build.manifest
+          path: cdp-workflows/scripts/build.manifest
 
       - name: Build application
         run: |
