@@ -2,8 +2,8 @@
 set -eu
 IFS=$'\n\t'
 
-if test -f ci/build.manifest; then
-    . ci/build.manifest
+if test -f scripts/build.manifest; then
+    . scripts/build.manifest
 fi
 
 echo "Building docker image and tagging as $IMAGE_NAME:latest and $IMAGE_NAME:$BUILD_VERSION"
