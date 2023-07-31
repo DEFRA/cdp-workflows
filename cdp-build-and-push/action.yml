@@ -1,0 +1,13 @@
+name: 'CDP: Build and Push'
+description: 'Builds a docker file, tags and pushes it'
+author: 'GitHub'
+inputs:
+  version:
+    default: "latest"
+runs:
+  using: 'ubuntu-latest'
+  steps:
+    - run: ${{ github.action_path }}/build.sh
+      shell: bash
+    - run: ${{ github.action_path }}/push.sh
+      shell: bash
