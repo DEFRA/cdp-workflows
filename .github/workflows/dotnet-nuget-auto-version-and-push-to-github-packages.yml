@@ -34,7 +34,7 @@ jobs:
       - name: Get common repo
         uses: actions/checkout@v3
         with:
-          repository: defra-cdp-sandpit/cdp-workflows
+          repository: DEFRA/cdp-workflows
           path: temp_scripts
 
       - name: Create nuget.config contents from secret
@@ -65,7 +65,7 @@ jobs:
           rm -rf nuget.config
 
       - name: Add Nuget Source
-        run: dotnet nuget add source --username USERNAME --password ${{ secrets.packages-access-token }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/defra-cdp-sandpit/index.json"
+        run: dotnet nuget add source --username USERNAME --password ${{ secrets.packages-access-token }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/DEFRA/index.json"
 
       - name: Pack Nuget
         run: dotnet pack -p:Version=${{ steps.increment-git-tag.outputs.GIT-TAG }} -c Release
