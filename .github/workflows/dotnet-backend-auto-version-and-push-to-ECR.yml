@@ -50,7 +50,7 @@ jobs:
       - name: Get common repo
         uses: actions/checkout@v3
         with:
-          repository: defra-cdp-sandpit/cdp-workflows
+          repository: DEFRA/cdp-workflows
           path: temp_scripts
 
       - name: Automatic Tagging of Releases part 1
