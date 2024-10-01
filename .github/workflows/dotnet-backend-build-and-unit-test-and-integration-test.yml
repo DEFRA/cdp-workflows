@@ -93,7 +93,7 @@ jobs:
 
       # In case there are any issues with the containers, the logs can be retrieved using this action
       #- name: Dump docker logs
-      #  uses: jwalton/gh-docker-logs@v2
+      #  uses: DEFRA/cdp-action-gh-docker-logs@v2.2.2
 
       - name: Run Integration Tests
         run: dotnet test ${{ inputs.integration-project-and-path }} --no-restore
