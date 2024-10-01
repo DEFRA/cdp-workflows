@@ -60,7 +60,7 @@ jobs:
             testresults/**/*.trx
 
       - name: Code Coverage Summary Report
-        uses: irongut/CodeCoverageSummary@v1.3.0
+        uses: DEFRA/cdp-action-CodeCoverageSummary@v1.3.0
         with:
           filename: testresults/*/coverage.cobertura.xml
           badge: true
