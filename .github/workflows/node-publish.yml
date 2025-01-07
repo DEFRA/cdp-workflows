@@ -75,7 +75,7 @@ jobs:
           mask-password: true
 
       - name: Upload build manifest
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build.manifest
           path: cdp-workflows/scripts/build.manifest
